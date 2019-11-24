@@ -1,7 +1,7 @@
 const assert = require('assert');
 const jsonql = require('../src/jsonql-total');
 
-describe('TotalJS common query test', function() {
+describe('common query test', function() {
 
     it('select + where', function(done) {
 

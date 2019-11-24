@@ -487,9 +487,6 @@ var JsonQL = {
                     resolve(content);
                 }).catch(error=>{
                     reject(error);
-                }).finally(() => {
-                    content = [];
-                    internalStack = [];
                 });
             } catch (error) {
                 reject(error);
@@ -599,10 +596,8 @@ var JsonQL = {
             this.clean();
             callback(null,dataresult);
         }).catch(error=>{
+            this.clean();
             callback(error);
-        }).finally(() => {
-            this.content = [];
-            this.promiseStack = [];
         });
     },
 

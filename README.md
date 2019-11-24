@@ -1,5 +1,17 @@
 # jsonql-totaljs
+[![NPM](https://nodei.co/npm/jsonql-totaljs.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/jsonql-totaljs/)  
+  
+[![npm version](https://img.shields.io/npm/v/jsonql-totaljs.svg?style=flat-square)](https://www.npmjs.org/package/jsonql-totaljs)
+[![Build Status](https://travis-ci.org/aalfiann/jsonql-totaljs.svg?branch=master)](https://travis-ci.org/aalfiann/jsonql-totaljs)
+[![Coverage Status](https://coveralls.io/repos/github/aalfiann/jsonql-totaljs/badge.svg?branch=master)](https://coveralls.io/github/aalfiann/jsonql-totaljs?branch=master)
+[![Known Vulnerabilities](https://snyk.io//test/github/aalfiann/jsonql-totaljs/badge.svg?targetFile=package.json)](https://snyk.io//test/github/aalfiann/jsonql-totaljs?targetFile=package.json)
+[![dependencies Status](https://david-dm.org/aalfiann/jsonql-totaljs/status.svg)](https://david-dm.org/aalfiann/jsonql-totaljs)
+![License](https://img.shields.io/npm/l/jsonql-totaljs)
+![NPM download/month](https://img.shields.io/npm/dm/jsonql-totaljs.svg)
+![NPM download total](https://img.shields.io/npm/dt/jsonql-totaljs.svg)  
 JsonQL NoSQL Embedded for Total.js Framework.
+
+This will make you easier to use NoSQL Embedded in [Total.js Framework](https://totaljs.com).
 
 ## Get Started
 
@@ -36,6 +48,32 @@ jsonql.query(q).promise().then((data) => {
 });
 ```
 
+- Multiple Query
+```javascript
+var q = [
+    {
+        select: {
+            from:'user',
+            where:[
+                ['name','==','wawan']
+            ]
+        }
+    },
+    {
+        select: {
+            from:'profile',
+            where:[
+                ['address','==','jakarta']
+            ]
+        }
+    }
+];
+    
+jsonql.query(q).exec(function(err,data) {
+    console.log(data);
+});
+```
+
 - Join Query
  ```javascript
 var q = [
@@ -57,7 +95,6 @@ var q = [
     }
 ];
 
-// with callback
 jsonql.query(q).exec(function(err,data) {
     console.log(data);        
 });
@@ -90,7 +127,6 @@ var q = [
     }
 ];
 
-// with callback
 jsonql.query(q).exec(function(err,data) {
     console.log(data);        
 });
@@ -147,7 +183,7 @@ jsonql.query(q).exec(function(err,data) {
 var q = [
     {
         update: {
-            from:'crud',
+            from:'data_crud',
             where:[
                 ['name','==','aziz']
             ],
@@ -169,7 +205,7 @@ jsonql.query(q).exec(function(err,data) {
 var q = [
     {
         modify: {
-            from:'crud',
+            from:'data_crud',
             where:[
                 ['name','==','aziz']
             ],
@@ -190,7 +226,7 @@ jsonql.query(q).exec(function(err,data) {
 var q = [
     {
         delete: {
-            from:'crud',
+            from:'data_crud',
             where:[
                 ['name','==','aziz']
             ]
@@ -201,4 +237,35 @@ var q = [
 jsonql.query(q).exec(function(err,data) {
     console.log(data);
 });
+```
+
+### Features
+`jsonql-totaljs` Query is support with :
+- join
+- where
+- between
+- search
+- fulltext
+- regexp
+- sort
+- take
+- skip
+- random
+- day
+- month
+- year
+- in
+- notin
+- page
+- paginate
+- scalar
+- query
+
+### Documentation
+For more detail in usage, please see the documentation in our [Wiki](https://github.com/aalfiann/jsonql-totaljs/wiki).
+
+## Unit Test
+All features has been tested, you also can learn how to use all features from unit test. 
+```bash
+$ npm test
 ```
