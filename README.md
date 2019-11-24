@@ -2,7 +2,7 @@
 [![NPM](https://nodei.co/npm/jsonql-totaljs.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/jsonql-totaljs/)  
   
 [![npm version](https://img.shields.io/npm/v/jsonql-totaljs.svg?style=flat-square)](https://www.npmjs.org/package/jsonql-totaljs)
-[![Build Status](https://travis-ci.org/aalfiann/jsonql-totaljs.svg?branch=master)](https://travis-ci.org/aalfiann/jsonql-totaljs)
+[![Build Status](https://travis-ci.com/aalfiann/jsonql-totaljs.svg?branch=master)](https://travis-ci.com/aalfiann/jsonql-totaljs)
 [![Coverage Status](https://coveralls.io/repos/github/aalfiann/jsonql-totaljs/badge.svg?branch=master)](https://coveralls.io/github/aalfiann/jsonql-totaljs?branch=master)
 [![Known Vulnerabilities](https://snyk.io//test/github/aalfiann/jsonql-totaljs/badge.svg?targetFile=package.json)](https://snyk.io//test/github/aalfiann/jsonql-totaljs?targetFile=package.json)
 [![dependencies Status](https://david-dm.org/aalfiann/jsonql-totaljs/status.svg)](https://david-dm.org/aalfiann/jsonql-totaljs)
