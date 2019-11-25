@@ -1,8 +1,8 @@
 {
   "name": "jsonql-totaljs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "JsonQL Query NoSQL Embedded for Total.js Framework.",
-  "main": "src/jsonql-totaljs.js",
+  "main": "src/jsonql-total.js",
   "scripts": {
     "test": "nyc --reporter=html --reporter=text mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
