@@ -11,9 +11,10 @@
 ![NPM download total](https://img.shields.io/npm/dt/jsonql-totaljs.svg)  
 JsonQL NoSQL Embedded for Total.js Framework.
 
-This will make you easier to use NoSQL Embedded in [Total.js Framework](https://totaljs.com).
+This will make you easier to use [NoSQL Embedded](https://docs.totaljs.com/latest/en.html#api~DatabaseBuilder) in [Total.js Framework](https://totaljs.com).
 
 ## Get Started
+Make sure you have already know how to use [Total.js Framework](https://totaljs.com).
 
 ### Install using NPM
 ```bash
@@ -238,28 +239,6 @@ jsonql.query(q).exec(function(err,data) {
     console.log(data);
 });
 ```
-
-### Features
-`jsonql-totaljs` Query is support with :
-- join
-- where
-- between
-- search
-- fulltext
-- regexp
-- sort
-- take
-- skip
-- random
-- day
-- month
-- year
-- in
-- notin
-- page
-- paginate
-- scalar
-- query
 
 ### Documentation
 For more detail in usage, please see the documentation in our [Wiki](https://github.com/aalfiann/jsonql-totaljs/wiki).

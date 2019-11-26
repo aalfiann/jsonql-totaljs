@@ -604,7 +604,7 @@ var JsonQL = {
     /**
      * Cleanup data in stackholder
      */
-    clean() {
+    clean: function() {
         this.content = [];
         this.promiseStack = [];
     },
