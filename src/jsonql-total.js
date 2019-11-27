@@ -2,7 +2,10 @@
  * JsonQL for NoSQL Embedded Total.js
  */
 "use strict";
+
 require('total.js');
+const safeEval = require('safe-eval');
+
 var JsonQL = {
     /**
      * Helper
@@ -78,6 +81,24 @@ var JsonQL = {
          */
         isEmptyObject: function(value) {
             return (value === undefined || value === null || (Object.keys(value).length === 0 && value.constructor === Object));
+        },
+
+        /**
+         * Determine value is json string
+         * @param {string} value 
+         * @return {bool}
+         */
+        isJsonString: function (value) {
+            value = typeof value !== "string" ? JSON.stringify(value) : value;
+            try {
+                value = JSON.parse(value);
+            } catch (e) {
+                return false;
+            }        
+            if (typeof value === "object" && value !== null) {
+                return true;
+            }
+            return false;
         }
     },
 
@@ -407,10 +428,10 @@ var JsonQL = {
                 if(obj[i].join){
                     if(obj[i].first) {
                         joined[i] = parent.join(obj[i].name,obj[i].from).on(...obj[i].on).first();
+                        this._joinScope('nested',joined[i],obj[i].join);
                     } else {
-                        joined[i] = parent.join(obj[i].name,obj[i].from).on(...obj[i].on);
-                    }
-                    this._joinScope('nested',joined[i],obj[i].join);
+                        throw new Error('Join as nested is required "first" set to be true');
+                    }                    
                 } else {
                     if(obj[i].first) {
                         parent.join(obj[i].name,obj[i].from).on(...obj[i].on).first();
@@ -485,8 +506,6 @@ var JsonQL = {
                     }
                     content.push({data:obj.into,count:counter});
                     resolve(content);
-                }).catch(error=>{
-                    reject(error);
                 });
             } catch (error) {
                 reject(error);
@@ -581,24 +600,23 @@ var JsonQL = {
      * @param {callback} callback   Callback(error,data) 
      */
     exec: function(callback) {
-        const toResultObject = (promise) => {
-            return promise
-            .then((response) => ({ status: true, response }))
-            .catch(error => ({ status: false, error }));
+        try{
+            const toResultObject = (promise) => {
+                return promise
+                .then((response) => ({ status: true, response }))
+                .catch(error => ({ status: false, error }));
+            };
+            Promise.all(this.promiseStack.map(toResultObject)).then(result => {
+                var len = result.length;
+                for (var i = 0; i < len; ++i) {
+                    this.content.push(result[i]);
+                }
+                var dataresult = [...this.content];
+                callback(null,dataresult);
+            });
+        } catch(err) {
+            callback(err);
         };
-
-        Promise.all(this.promiseStack.map(toResultObject)).then(result => {
-            var len = result.length;
-            for (var i = 0; i < len; ++i) {
-                this.content.push(result[i]);
-            }
-            var dataresult = [...this.content];
-            this.clean();
-            callback(null,dataresult);
-        }).catch(error=>{
-            this.clean();
-            callback(error);
-        });
     },
 
     /**
@@ -627,24 +645,34 @@ var JsonQL = {
      * @return {JsonQL}
      */
     query: function(query) {
-        for (var key in query) {
-            for (var k in query[key]) {
-                if (query[key].hasOwnProperty(k)) {
-                    switch(true) {
-                        case (k == 'insert'):
-                            this._insert(query[key].insert);
-                            break;
-                        case (k == 'update'):
-                            this._update(query[key].update);
-                            break;
-                        case (k == 'modify'):
-                            this._modify(query[key].modify);
-                            break;
-                        case (k == 'delete'):
-                            this._delete(query[key].delete);
-                            break;
-                        default:
-                            this._select(query[key].select);
+        this.clean();
+        if(this.helper.isString(query)) {
+            if(this.helper.isJsonString(query)){
+                query = JSON.parse(query);
+            } else {
+                query = JSON.parse(JSON.stringify(safeEval(query)));
+            }
+        }
+        if(this.helper.isArray(query)) {
+            for (var key in query) {
+                for (var k in query[key]) {
+                    if (query[key].hasOwnProperty(k)) {
+                        switch(true) {
+                            case (k == 'insert'):
+                                this._insert(query[key].insert);
+                                break;
+                            case (k == 'update'):
+                                this._update(query[key].update);
+                                break;
+                            case (k == 'modify'):
+                                this._modify(query[key].modify);
+                                break;
+                            case (k == 'delete'):
+                                this._delete(query[key].delete);
+                                break;
+                            default:
+                                this._select(query[key].select);
+                        }
                     }
                 }
             }

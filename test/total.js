@@ -3,6 +3,65 @@ const jsonql = require('../src/jsonql-total');
 
 describe('common query test', function() {
 
+    it('query with formatted json string', function(done) {
+
+        var q = JSON.stringify([
+            {
+                select: {
+                    fields:['user_id','name'],
+                    from:'~'+__dirname+'/fixtures/data1.nosql',
+                    where:[
+                        ['name','==','budi']
+                    ]
+                }
+            }
+        ]);
+    
+        jsonql.query(q).exec(function(err,data) {
+            assert.equal(data.length,1);
+            assert.equal(data[0].status,true);
+            assert.equal(data[0].response.data.length,1);
+            assert.equal(data[0].response.count,1);
+            done();
+        });
+    });
+
+    it('query with object as string', function(done) {
+
+        var q = "[{select: {fields:['user_id','name'],from:'~"+__dirname+"/fixtures/data1.nosql',where:[['name','==','budi']]}}]";
+    
+        jsonql.query(q).exec(function(err,data) {
+            assert.equal(data.length,1);
+            assert.equal(data[0].status,true);
+            assert.equal(data[0].response.data.length,1);
+            assert.equal(data[0].response.count,1);
+            done();
+        });
+    });
+
+    it('query directly with an object', function(done) {
+
+        var q = [
+            {
+                select: {
+                    fields:['user_id','name'],
+                    from:'~'+__dirname+'/fixtures/data1.nosql',
+                    where:[
+                        ['name','==','budi']
+                    ]
+                }
+            }
+        ];
+    
+        jsonql.query(q).exec(function(err,data) {
+            assert.equal(data.length,1);
+            assert.equal(data[0].status,true);
+            assert.equal(data[0].response.data.length,1);
+            assert.equal(data[0].response.count,1);
+            done();
+        });
+    });
+
     it('select + where', function(done) {
 
         var q = [
@@ -788,6 +847,56 @@ describe('intentional failure test', function(){
         jsonql.query(q).exec(function(err,data) {
             assert.equal(data.length,1);
             assert.equal(data[0].status,false);
+            done();
+        });
+    });
+
+    it('select + join nested with first false', function(done){
+        var q = [
+            {
+                select: {
+                    fields:['user_id','name'],
+                    from:'~'+__dirname+'/fixtures/data1.nosql',
+                    join:[
+                        {
+                            name:'data2',
+                            from:'~'+__dirname+'/fixtures/data2.nosql',
+                            on:['id','user_id'],
+                            first:false,
+                            join: [
+                                {
+                                    name:'data3',
+                                    from:'~'+__dirname+'/fixtures/data3.nosql',
+                                    on:['id','id'],
+                                    first:false
+                                }
+                            ]   
+                        }
+                    ]
+                }
+            }
+        ];
+
+        jsonql.query(q).promise().then(data => {
+            assert.equal(data.length,1);
+            assert.equal(data[0].status,false);
+            done();
+        });
+    });
+
+    it('execute without query test', function(done) {
+        var q = [];
+    
+        jsonql.query(q).exec(function(err,data) {
+            assert.deepEqual(data,[]);
+            done();
+        });
+    });
+
+    it('query object parameter value must hasOwnProperty',function(done){
+        const q = Object.create({name: 'inherited'});
+        jsonql.query(q).exec(function(err,data) {
+            assert.deepEqual(data,[]);
             done();
         });
     });

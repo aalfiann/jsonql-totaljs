@@ -1,6 +1,6 @@
 {
   "name": "jsonql-totaljs",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "JsonQL Query NoSQL Embedded for Total.js Framework.",
   "main": "src/jsonql-total.js",
   "scripts": {
@@ -25,7 +25,9 @@
     "url": "https://github.com/aalfiann/jsonql-totaljs/issues"
   },
   "homepage": "https://github.com/aalfiann/jsonql-totaljs#readme",
-  "dependencies": {},
+  "dependencies": {
+    "safe-eval": "^0.4.1"
+  },
   "devDependencies": {
     "coveralls": "^3.0.7",
     "mocha": "^6.2.2",
