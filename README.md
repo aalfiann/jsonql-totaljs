@@ -24,8 +24,11 @@ $ npm install jsonql-totaljs
 ### Usage
 - Basic Query
 ```javascript
-const jsonql = require('jsonql-totaljs');
+const JsonQL = require('jsonql-totaljs');
+// create new object jsonql
+const jsonql = new JsonQL();
 
+// build query
 var q = [
     {
         select: {
@@ -49,7 +52,7 @@ jsonql.query(q).promise().then((data) => {
 });
 ```
 
-- Multiple Query
+- Multiple Query in Single Execution
 ```javascript
 var q = [
     {

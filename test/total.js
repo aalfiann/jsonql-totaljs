@@ -1,7 +1,40 @@
 const assert = require('assert');
-const jsonql = require('../src/jsonql-total');
+const JsonQL = require('../src/jsonql-total');
+const jsonql = new JsonQL();
 
 describe('common query test', function() {
+
+    it('multiple query execution test', function(){ 
+        var jsonql1 = new JsonQL();
+        jsonql1.query([
+            {
+                select: {
+                    fields:['user_id','name'],
+                    from:'~'+__dirname+'/fixtures/data1.nosql',
+                    where:[
+                        ['name','==','budi']
+                    ]
+                }
+            }
+        ]).exec(function(err,data) {
+            assert.equal(data[0].response.data[0].name,'budi');
+        });
+    
+        var jsonql2 = new JsonQL();
+        jsonql2.query([
+            {
+                select: {
+                    fields:['user_id'],
+                    from:'~'+__dirname+'/fixtures/data1.nosql',
+                    where:[
+                        ['name','==','budi']
+                    ]
+                }
+            }
+        ]).promise().then(function(data) {
+            assert.equal(data[0].response.data[0].name,undefined);
+        });
+    });
 
     it('query with formatted json string', function(done) {
 

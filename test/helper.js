@@ -1,5 +1,6 @@
 const assert = require('assert');
-const jsonql = require('../src/jsonql-total');
+const JsonQL = require('../src/jsonql-total');
+const jsonql = new JsonQL();
 
 describe('helper test', function() {
     it('is string', function() {

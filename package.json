@@ -1,6 +1,6 @@
 {
   "name": "jsonql-totaljs",
-  "version": "1.0.4",
+  "version": "1.1.0",
   "description": "JsonQL Query NoSQL Embedded for Total.js Framework.",
   "main": "src/jsonql-total.js",
   "scripts": {

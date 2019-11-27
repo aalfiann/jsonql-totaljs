@@ -6,244 +6,243 @@
 require('total.js');
 const safeEval = require('safe-eval');
 
-var JsonQL = {
-    /**
-     * Helper
-     */
-    helper: {
-        /**
-         * Determine value is string
-         * @param {*} value
-         * @return {bool} 
-         */
-        isString: function(value) {
-            return typeof value === 'string' || value instanceof String;
-        },
+class JsonQL {
 
-        /**
-         * Determine value is integer
-         * @param {*} value
-         * @return {bool} 
-         */
-        isInteger: function(value) {
-            return Number.isInteger(value);
-        },
+    constructor() {
+        // Promise Stackholder
+        this.promiseStack = [];
+        // Result from database
+        this.content = [];
+        // helper
+        this.helper = {
+            /**
+             * Determine value is string
+             * @param {*} value
+             * @return {bool} 
+             */
+            isString: function(value) {
+                return typeof value === 'string' || value instanceof String;
+            },
 
-        /**
-         * Determine value is boolean
-         * @param {*} value
-         * @return {bool} 
-         */
-        isBoolean: function(value) {
-            return typeof value === 'boolean' || (typeof value === 'object' && value !== null && typeof value.valueOf() === 'boolean');
-        },
+            /**
+             * Determine value is integer
+             * @param {*} value
+             * @return {bool} 
+             */
+            isInteger: function(value) {
+                return Number.isInteger(value);
+            },
 
-        /**
-         * Determine value is array
-         * @param {*} value 
-         * @return {bool}
-         */
-        isArray: function(value) {
-            return value && typeof value === 'object' && value.constructor === Array;
-        },
+            /**
+             * Determine value is boolean
+             * @param {*} value
+             * @return {bool} 
+             */
+            isBoolean: function(value) {
+                return typeof value === 'boolean' || (typeof value === 'object' && value !== null && typeof value.valueOf() === 'boolean');
+            },
 
-        /**
-         * Determine value is object
-         * @param {*} value 
-         * @return {bool}
-         */
-        isObject: function(value) {
-            return value && typeof value === 'object' && value.constructor === Object;
-        },
+            /**
+             * Determine value is array
+             * @param {*} value 
+             * @return {bool}
+             */
+            isArray: function(value) {
+                return value && typeof value === 'object' && value.constructor === Array;
+            },
 
-        /**
-         * Determine value is empty
-         * @param {var} value
-         * @return {bool} 
-         */
-        isEmpty: function(value) {
-            return (value === undefined || value === null || value === '');
-        },
+            /**
+             * Determine value is object
+             * @param {*} value 
+             * @return {bool}
+             */
+            isObject: function(value) {
+                return value && typeof value === 'object' && value.constructor === Object;
+            },
 
-        /**
-         * Determine value is empty and array
-         * @param {*} value 
-         * @return {bool}
-         */
-        isEmptyArray: function(value) {
-            return (value === undefined || value === null || value.length == 0);
-        },
+            /**
+             * Determine value is empty
+             * @param {var} value
+             * @return {bool} 
+             */
+            isEmpty: function(value) {
+                return (value === undefined || value === null || value === '');
+            },
 
-        /**
-         * Determine object value is empty
-         * @param {*} value 
-         * @return {bool}
-         */
-        isEmptyObject: function(value) {
-            return (value === undefined || value === null || (Object.keys(value).length === 0 && value.constructor === Object));
-        },
+            /**
+             * Determine value is empty and array
+             * @param {*} value 
+             * @return {bool}
+             */
+            isEmptyArray: function(value) {
+                return (value === undefined || value === null || value.length == 0);
+            },
 
-        /**
-         * Determine value is json string
-         * @param {string} value 
-         * @return {bool}
-         */
-        isJsonString: function (value) {
-            value = typeof value !== "string" ? JSON.stringify(value) : value;
-            try {
-                value = JSON.parse(value);
-            } catch (e) {
+            /**
+             * Determine object value is empty
+             * @param {*} value 
+             * @return {bool}
+             */
+            isEmptyObject: function(value) {
+                return (value === undefined || value === null || (Object.keys(value).length === 0 && value.constructor === Object));
+            },
+
+            /**
+             * Determine value is json string
+             * @param {string} value 
+             * @return {bool}
+             */
+            isJsonString: function (value) {
+                value = typeof value !== "string" ? JSON.stringify(value) : value;
+                try {
+                    value = JSON.parse(value);
+                } catch (e) {
+                    return false;
+                }        
+                if (typeof value === "object" && value !== null) {
+                    return true;
+                }
                 return false;
-            }        
-            if (typeof value === "object" && value !== null) {
-                return true;
             }
-            return false;
-        }
-    },
-
-    // Query Builder
-    // Promise Stackholder
-    promiseStack : [],
-    // Result from database
-    content: [],
+        };
+    }
 
     /**
      * builder.between
      * @param {DatabaseBuilder} parent 
      * @param {array} between
      */
-    _builderBetween: function(parent,between) {
+    _builderBetween(parent,between) {
         if(!this.helper.isEmpty(between) && this.helper.isArray(between) && !this.helper.isEmptyArray(between)) {
             for(var i=0;i<between.length;i++) {
                 parent.between(...between[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.where
      * @param {DatabaseBuilder} parent 
      * @param {array} where
      */
-    _builderWhere: function(parent,where) {
+    _builderWhere(parent,where) {
         if(!this.helper.isEmpty(where) && this.helper.isArray(where) && !this.helper.isEmptyArray(where)) {
             for(var i=0;i<where.length;i++) {
                 parent.where(...where[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.search
      * @param {DatabaseBuilder} parent 
      * @param {array} search
      */
-    _builderSearch: function(parent,search) {
+    _builderSearch(parent,search) {
         if(!this.helper.isEmpty(search) && this.helper.isArray(search) && !this.helper.isEmptyArray(search)) {
             for(var i=0;i<search.length;i++) {
                 parent.search(...search[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.regexp
      * @param {DatabaseBuilder} parent 
      * @param {array} regexp
      */
-    _builderRegExp: function(parent,regexp) {
+    _builderRegExp(parent,regexp) {
         if(!this.helper.isEmpty(regexp) && this.helper.isArray(regexp) && !this.helper.isEmptyArray(regexp)) {
             for(var i=0;i<regexp.length;i++) {
                 parent.regexp(...regexp[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.day
      * @param {DatabaseBuilder} parent 
      * @param {array} day
      */
-    _builderDay: function(parent,day) {
+    _builderDay(parent,day) {
         if(!this.helper.isEmpty(day) && this.helper.isArray(day) && !this.helper.isEmptyArray(day)) {
             for(var i=0;i<day.length;i++) {
                 parent.day(...day[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.month
      * @param {DatabaseBuilder} parent 
      * @param {array} month
      */
-    _builderMonth: function(parent,month) {
+    _builderMonth(parent,month) {
         if(!this.helper.isEmpty(month) && this.helper.isArray(month) && !this.helper.isEmptyArray(month)) {
             for(var i=0;i<month.length;i++) {
                 parent.month(...month[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.year
      * @param {DatabaseBuilder} parent 
      * @param {array} year
      */
-    _builderYear: function(parent,year) {
+    _builderYear(parent,year) {
         if(!this.helper.isEmpty(year) && this.helper.isArray(year) && !this.helper.isEmptyArray(year)) {
             for(var i=0;i<year.length;i++) {
                 parent.year(...year[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.in
      * @param {DatabaseBuilder} parent 
      * @param {array} in
      */
-    _builderIn: function(parent,objIn) {
+    _builderIn(parent,objIn) {
         if(!this.helper.isEmpty(objIn) && this.helper.isArray(objIn) && !this.helper.isEmptyArray(objIn)) {
             for(var i=0;i<objIn.length;i++) {
                 parent.in(...objIn[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.notin
      * @param {DatabaseBuilder} parent 
      * @param {array} notin
      */
-    _builderNotIn: function(parent,notIn) {
+    _builderNotIn(parent,notIn) {
         if(!this.helper.isEmpty(notIn) && this.helper.isArray(notIn) && !this.helper.isEmptyArray(notIn)) {
             for(var i=0;i<notIn.length;i++) {
                 parent.notin(...notIn[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.fulltext
      * @param {DatabaseBuilder} parent 
      * @param {array} fulltext
      */
-    _builderFullText: function(parent,fulltext) {
+    _builderFullText(parent,fulltext) {
         if(!this.helper.isEmpty(fulltext) && this.helper.isArray(fulltext) && !this.helper.isEmptyArray(fulltext)) {
             for(var i=0;i<fulltext.length;i++) {
                 parent.fulltext(...fulltext[i]);
             }
         }
-    },
+    }
 
     /**
      * builder.and
      * @param {DatabaseBuilder} parent 
      * @param {object} and
      */
-    _builderAnd: function(parent,and) {
+    _builderAnd(parent,and) {
         if(!this.helper.isEmpty(and) && this.helper.isObject(and) && !this.helper.isEmptyObject(and)) {
             parent.and();
             this._builderBetween(parent,and.between);
@@ -258,14 +257,14 @@ var JsonQL = {
             this._builderFullText(parent,and.fulltext);
             parent.end();
         }
-    },
+    }
 
     /**
      * builder.or
      * @param {DatabaseBuilder} parent 
      * @param {object} or
      */
-    _builderOr: function(parent,or) {
+    _builderOr(parent,or) {
         if(!this.helper.isEmpty(or) && this.helper.isObject(or) && !this.helper.isEmptyObject(or)) {
             parent.or();
             this._builderBetween(parent,or.between);
@@ -280,106 +279,106 @@ var JsonQL = {
             this._builderFullText(parent,or.fulltext);
             parent.end();
         }
-    },
+    }
 
     /**
      * builder.fields
      * @param {DatabaseBuilder} parent 
      * @param {array} fields
      */
-    _setFields: function(parent,fields) {
+    _setFields(parent,fields) {
         if(!this.helper.isEmpty(fields) && this.helper.isArray(fields) && !this.helper.isEmptyArray(fields)) {
             parent.fields(...fields);
         }
-    },
+    }
 
     /**
      * builder.sort
      * @param {DatabaseBuilder} parent 
      * @param {array} sort
      */
-    _setSort: function(parent,sort) {
+    _setSort(parent,sort) {
         if(!this.helper.isEmpty(sort) && this.helper.isArray(sort) && !this.helper.isEmptyArray(sort)) {
             parent.sort(...sort);
         }
-    },
+    }
 
     /**
      * builder.skip
      * @param {DatabaseBuilder} parent 
      * @param {string|integer} skip
      */
-    _setSkip: function(parent,skip) {
+    _setSkip(parent,skip) {
         if(!this.helper.isEmpty(skip) && (this.helper.isString(skip) || this.helper.isInteger(skip))) {
             parent.skip(parseInt(skip));
         }
-    },
+    }
 
     /**
      * builder.take
      * @param {DatabaseBuilder} parent 
      * @param {string|integer} take
      */
-    _setTake: function(parent,take) {
+    _setTake(parent,take) {
         if(!this.helper.isEmpty(take) && (this.helper.isString(take) || this.helper.isInteger(take))) {
             parent.take(parseInt(take));
         }
-    },
+    }
 
     /**
      * builder.page
      * @param {DatabaseBuilder} parent 
      * @param {array} page
      */
-    _setPage: function(parent,page) {
+    _setPage(parent,page) {
         if(!this.helper.isEmpty(page) && this.helper.isArray(page) && !this.helper.isEmptyArray(page)) {
             parent.page(...page);
         }
-    },
+    }
 
     /**
      * builder.paginate
      * @param {DatabaseBuilder} parent 
      * @param {array} paginate
      */
-    _setPaginate: function(parent,paginate) {
+    _setPaginate(parent,paginate) {
         if(!this.helper.isEmpty(paginate) && this.helper.isArray(paginate) && !this.helper.isEmptyArray(paginate)) {
             parent.paginate(...paginate);
         }
-    },
+    }
 
     /**
      * builder.scalar
      * @param {DatabaseBuilder} parent 
      * @param {array} scalar
      */
-    _setScalar: function(parent,scalar) {
+    _setScalar(parent,scalar) {
         if(!this.helper.isEmpty(scalar) && this.helper.isArray(scalar) && !this.helper.isEmptyArray(scalar)) {
             parent.scalar(...scalar);
         }
-    },
+    }
 
     /**
      * builder.random
      * @param {DatabaseBuilder} parent 
      * @param {boolean} random
      */
-    _setRandom: function(parent,random) {
+    _setRandom(parent,random) {
         if(!this.helper.isEmpty(random) && this.helper.isBoolean(random)) {
             if(random) parent.random();
         }
-    },
+    }
 
     /**
      * builder.query
      * @param {DatabaseBuilder} parent 
      * @param {string} query
      */
-    _setQuery: function(parent,query) {
+    _setQuery(parent,query) {
         if(!this.helper.isEmpty(query) && this.helper.isString(query)) {
             parent.query(query);
         }
-    },
+    }
 
     /**
      * Scope for Query Select
@@ -387,7 +386,7 @@ var JsonQL = {
      * @param {DatabaseBuilder} parent 
      * @param {object} obj 
      */
-    _selectScope: function(scope,parent,obj) {
+    _selectScope(scope,parent,obj) {
         scope = scope.toLowerCase();
         this._setFields(parent,obj.fields);
         this._builderBetween(parent,obj.between);
@@ -412,14 +411,15 @@ var JsonQL = {
         this._setScalar(parent,obj.scalar);
         this._setQuery(parent,obj.query);
         this._setRandom(parent,obj.random);
-    },
+    }
 
     /**
-     * Join Builder
-     * @param {DatabaseBuilder} parent 
+     * Join Builder 
+     * @param {string} scope
+     * @param {DatabaseBuilder} parent
      * @param {object} obj 
      */
-    _joinScope: function(scope,parent,obj) {
+    _joinScope(scope,parent,obj) {
         if(!this.helper.isEmpty(obj) && this.helper.isArray(obj) && !this.helper.isEmptyArray(obj)) {
             var len = obj.length;
             var joined = [];
@@ -442,14 +442,14 @@ var JsonQL = {
                 }
             }
         }
-    },
+    }
 
     /**
      * Query Builder for Select 
      * @param {object} obj 
      * @return {Promise}
      */
-    _select: function(obj) {
+    _select(obj) {
         this.promiseStack.push(new Promise((resolve,reject) => {
             try{
                 var nosql = NOSQL(obj.from);
@@ -472,14 +472,14 @@ var JsonQL = {
                 reject(error);
             }
         }));
-    },
+    }
 
     /**
      * Query Builder for Insert 
      * @param {object} obj 
      * @return {Promise}
      */
-    _insert: function(obj) {
+    _insert(obj) {
         var internalStack = [];
         var content = [];
         this.promiseStack.push(new Promise((resolve,reject) => {
@@ -511,14 +511,14 @@ var JsonQL = {
                 reject(error);
             }
         }));
-    },
+    }
 
     /**
      * Query Builder for Update 
      * @param {object} obj 
      * @return {Promise}
      */
-    _update: function(obj) {
+    _update(obj) {
         this.promiseStack.push(new Promise((resolve,reject) => {
             try{
                 var nosql = NOSQL(obj.from);
@@ -538,14 +538,14 @@ var JsonQL = {
                 reject(error);
             }
         }));
-    },
+    }
 
     /**
      * Query Builder for Modify 
      * @param {object} obj 
      * @return {Promise}
      */
-    _modify: function(obj) {
+    _modify(obj) {
         this.promiseStack.push(new Promise((resolve,reject) => {
             try{
                 var nosql = NOSQL(obj.from);
@@ -565,7 +565,7 @@ var JsonQL = {
                 reject(error);
             }
         }));
-    },
+    }
 
 
     /**
@@ -573,7 +573,7 @@ var JsonQL = {
      * @param {object} obj 
      * @return {Promise}
      */
-    _delete: function(obj) {
+    _delete(obj) {
         this.promiseStack.push(new Promise((resolve,reject) => {
             try{
                 var nosql = NOSQL(obj.from);
@@ -593,13 +593,13 @@ var JsonQL = {
                 reject(error);
             }
         }));
-    },
+    }
 
     /**
      * Execute Query Builder
      * @param {callback} callback   Callback(error,data) 
      */
-    exec: function(callback) {
+    exec(callback) {
         try{
             const toResultObject = (promise) => {
                 return promise
@@ -617,34 +617,34 @@ var JsonQL = {
         } catch(err) {
             callback(err);
         };
-    },
+    }
 
     /**
      * Cleanup data in stackholder
      */
-    clean: function() {
+    clean() {
         this.content = [];
         this.promiseStack = [];
-    },
+    }
 
     /**
      * Execute Query Builder on top Promise
      */
-    promise: function() {
+    promise() {
         return new Promise((resolve,reject) => {
             this.exec(function(err,data) {
                 if(err) return reject(err);
                 resolve(data);
             });
         });
-    },
+    }
 
     /**
      * Set Query
      * @param {array} query 
      * @return {JsonQL}
      */
-    query: function(query) {
+    query(query) {
         this.clean();
         if(this.helper.isString(query)) {
             if(this.helper.isJsonString(query)){
@@ -679,7 +679,6 @@ var JsonQL = {
         }
         return this;
     }
-
-};
+}
 
 module.exports = JsonQL;
