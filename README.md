@@ -14,7 +14,6 @@ JsonQL NoSQL Embedded for Total.js Framework.
 This will make you easier to use [NoSQL Embedded](https://docs.totaljs.com/latest/en.html#api~DatabaseBuilder) in [Total.js Framework](https://totaljs.com).
 
 ## Get Started
-Make sure you have already know how to use [Total.js Framework](https://totaljs.com).
 
 ### Install using NPM
 ```bash
