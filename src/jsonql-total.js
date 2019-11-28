@@ -1,10 +1,16 @@
-/**
- * JsonQL for NoSQL Embedded Total.js
+/*!
+ * JsonQL ES6 v1.2.0 [NodeJS]
+ * https://github.com/aalfiann/jsonql-totaljs
+ *
+ * Copyright 2019 M ABD AZIZ ALFIAN
+ * Released under the MIT license
+ * https://github.com/aalfiann/jsonql-totaljs/blob/master/LICENSE
  */
 "use strict";
 
 require('total.js');
 const safeEval = require('safe-eval');
+const FlyJsonOdm = require('fly-json-odm');
 
 class JsonQL {
 
@@ -13,6 +19,8 @@ class JsonQL {
         this.promiseStack = [];
         // Result from database
         this.content = [];
+        // fly json odm
+        this._odm = new FlyJsonOdm();
         // helper
         this.helper = {
             /**
@@ -282,6 +290,58 @@ class JsonQL {
     }
 
     /**
+     * builder item list for map transform
+     * @param {array} table 
+     * @return {object}
+     */
+    _builderItemList(table) {
+        var keys = Object.keys(table[0]);
+        var result = {};
+        for(var i=0;i<keys.length;i++) {
+            Object.assign(result,{[keys[i]]:keys[i].toString()});    
+        }
+        return result;
+    }
+
+    /**
+     * builder.nested
+     * @param {array} table 
+     * @param {array} nested 
+     * @return {array}
+     */
+    _builderNested(table,nested) {
+        var removed = [...nested];
+        removed.shift();
+  
+        var data = {
+        	posts : table
+        };
+
+        var map = {
+        	list : 'posts',
+        	item: this._builderItemList(table),
+        	each: function(item){
+                var up = null;
+                for(var x=1;x<nested.length;x++) {
+                    if(up) {
+                        up[nested[x]] = item[nested[x]];
+                        up = up[nested[x]];    
+                    } else {
+                        item[nested[0]][nested[x]] = item[nested[x]];
+                        up = item[nested[0]][nested[x]];
+                    }
+                }
+                return item;
+            },
+            defaults: {
+                "missingData": true
+            },
+            remove:removed
+        };
+        return this._odm.jsonTransform(data, map).make();
+    }
+
+    /**
      * builder.fields
      * @param {DatabaseBuilder} parent 
      * @param {array} fields
@@ -462,6 +522,10 @@ class JsonQL {
                     // callback
                     builder.callback((err,response,count)=> {
                         if(err) return reject(err);
+                        // join nested manual
+                        if(obj.join && obj.nested) {
+                            response = this._builderNested(response,obj.nested);
+                        }
                         resolve({
                             data:response,
                             count:count

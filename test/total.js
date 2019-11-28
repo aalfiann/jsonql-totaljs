@@ -299,6 +299,47 @@ describe('common query test', function() {
         });
     });
 
+    it('select + join nested manually', function(done){
+        var q = [
+            {
+                select: {
+                    fields:['user_id','name'],
+                    from:'~'+__dirname+'/fixtures/data1.nosql',
+                    join:[
+                        {
+                            name:'data2',
+                            from:'~'+__dirname+'/fixtures/data2.nosql',
+                            on:['id','user_id'],
+                            first:true
+                        },
+                        {
+                            name:'data3',
+                            from:'~'+__dirname+'/fixtures/data3.nosql',
+                            on:['id','user_id'],
+                            first:true
+                        },
+                        {
+                            name:'data4',
+                            from:'~'+__dirname+'/fixtures/data4.nosql',
+                            on:['id','user_id'],
+                            first:true
+                        }
+                    ],
+                    nested:['data2','data3','data4']
+                }
+            }
+        ];
+
+        jsonql.query(q).promise().then(data => {
+            assert.equal(data.length,1);
+            assert.equal(data[0].response.data[0].user_id,1);
+            assert.equal(data[0].response.data[0].data2.id,1);
+            assert.equal(data[0].response.data[0].data2.data3.id,1);
+            assert.equal(data[0].response.data[0].data2.data3.data4.id,1);
+            done();
+        });
+    });
+
 });
 
 describe('function query test', function(){
@@ -647,6 +688,25 @@ describe('function query test', function(){
         });
     });
 
+    it('select + random false', function(done) {
+
+        var q = [
+            {
+                select: {
+                    from:'~'+__dirname+'/fixtures/data2.nosql',
+                    random:false
+                }
+            }
+        ];
+    
+        jsonql.query(q).exec(function(err,data) {
+            assert.equal(data.length,1);
+            assert.equal(data[0].status,true);
+            assert.equal(data[0].response.data.length,5);
+            done();
+        });
+    });
+
     it('select + query', function(done) {
 
         var q = [
@@ -927,7 +987,17 @@ describe('intentional failure test', function(){
     });
 
     it('query object parameter value must hasOwnProperty',function(done){
-        const q = Object.create({name: 'inherited'});
+        const q = [
+            Object.create({select: 'inherited'})
+        ];
+        jsonql.query(q).exec(function(err,data) {
+            assert.deepEqual(data,[]);
+            done();
+        });
+    });
+
+    it('query parameter value must string or array or object',function(done){
+        const q = true;
         jsonql.query(q).exec(function(err,data) {
             assert.deepEqual(data,[]);
             done();

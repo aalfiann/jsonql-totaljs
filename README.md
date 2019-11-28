@@ -119,13 +119,48 @@ var q = [
                     on:['id','id'],
                     first:true,
                     join:[
-                        name:'additional',
-                        from:'user_other',
-                        on:['id','id'],
-                        first:false
+                        {
+                            name:'additional',
+                            from:'user_other',
+                            on:['id','id'],
+                            first:false
+                        }
                     ]
                 }
             ]
+        }
+    }
+];
+
+jsonql.query(q).exec(function(err,data) {
+    console.log(data);        
+});
+```
+
+- Join Nested Manually
+```javascript
+var q = [
+    {
+        select: {
+            from:'user',
+            where:[
+                ['name','==','budi']
+            ],
+            join:[
+                {
+                    name:'profile',
+                    from:'user_profile',
+                    on:['id','id'],
+                    first:true
+                },
+                {
+                    name:'additional',
+                    from:'user_other',
+                    on:['id','id'],
+                    first:false
+                }
+            ],
+            nested:['profile','additional']
         }
     }
 ];
