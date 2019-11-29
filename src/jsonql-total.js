@@ -1,5 +1,5 @@
 /*!
- * JsonQL ES6 v1.2.0 [NodeJS]
+ * JsonQL ES6 v1.2.1 [NodeJS]
  * https://github.com/aalfiann/jsonql-totaljs
  *
  * Copyright 2019 M ABD AZIZ ALFIAN
@@ -524,7 +524,7 @@ class JsonQL {
                         if(err) return reject(err);
                         // join nested manual
                         if(obj.join && obj.nested) {
-                            response = this._builderNested(response,obj.nested);
+                            response = this._odm.deepClone(this._builderNested(response,obj.nested));
                         }
                         resolve({
                             data:response,
