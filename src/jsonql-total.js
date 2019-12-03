@@ -1,5 +1,5 @@
 /*!
- * JsonQL ES6 v1.2.1 [NodeJS]
+ * JsonQL ES6 v1.2.2 [NodeJS]
  * https://github.com/aalfiann/jsonql-totaljs
  *
  * Copyright 2019 M ABD AZIZ ALFIAN
@@ -482,23 +482,21 @@ class JsonQL {
     _joinScope(scope,parent,obj) {
         if(!this.helper.isEmpty(obj) && this.helper.isArray(obj) && !this.helper.isEmptyArray(obj)) {
             var len = obj.length;
-            var joined = [];
             for(var i=0;i<len;i++) {
                 // nested join
                 if(obj[i].join){
                     if(obj[i].first) {
-                        joined[i] = parent.join(obj[i].name,obj[i].from).on(...obj[i].on).first();
-                        this._joinScope('nested',joined[i],obj[i].join);
+                        var joined = parent.join(obj[i].name,obj[i].from).on(...obj[i].on).first();
+                        this._joinScope('nested',joined,obj[i].join);
                     } else {
                         throw new Error('Join as nested is required "first" set to be true');
                     }                    
                 } else {
+                    var main_joined = parent.join(obj[i].name,obj[i].from).on(...obj[i].on);
                     if(obj[i].first) {
-                        parent.join(obj[i].name,obj[i].from).on(...obj[i].on).first();
-                    } else {
-                        parent.join(obj[i].name,obj[i].from).on(...obj[i].on);
+                        main_joined.first();
                     }
-                    this._selectScope(scope,parent,obj[i]);
+                    this._selectScope(scope,main_joined,obj[i]);
                 }
             }
         }
@@ -514,10 +512,12 @@ class JsonQL {
             try{
                 var nosql = NOSQL(obj.from);
                 nosql.find().make(builder => {
-                    this._selectScope('main',builder,obj);
                     
                     // join
                     this._joinScope('join',builder,obj.join);
+
+                    // main
+                    this._selectScope('main',builder,obj);
                     
                     // callback
                     builder.callback((err,response,count)=> {
