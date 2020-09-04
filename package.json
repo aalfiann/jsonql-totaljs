@@ -1,10 +1,10 @@
 {
   "name": "jsonql-totaljs",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "JsonQL Query NoSQL Embedded for Total.js Framework.",
   "main": "src/jsonql-total.js",
   "scripts": {
-    "test": "nyc --reporter=html --reporter=text mocha",
+    "test": "standard && nyc --reporter=html --reporter=text mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
@@ -27,13 +27,14 @@
   "homepage": "https://github.com/aalfiann/jsonql-totaljs#readme",
   "dependencies": {
     "fly-json-odm": "^1.8.4",
-    "safe-eval": "^0.4.1"
+    "notevil": "^1.3.3"
   },
   "devDependencies": {
     "coveralls": "^3.0.7",
     "mocha": "^6.2.2",
     "mocha-lcov-reporter": "^1.3.0",
     "nyc": "^14.1.1",
+    "standard": "^14.3.4",
     "total.js": "^3.3.3-3"
   }
 }
